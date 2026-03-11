@@ -17,10 +17,10 @@ import frc.robot.subsystems.drive.SwerveMod;
 import frc.robot.subsystems.drive.SwerveMod.ModuleName;
 
 public class RobotContainer {
-  private final XboxController driver = new XboxController(0);
+  private final XboxController driver = new XboxController(0); //creates xbox controller
 
   private final Drive drive;
-
+/**creates robot if robot is not real */
   public RobotContainer() {
     if (Robot.isReal()) {
       drive = new Drive(null, null);
@@ -38,8 +38,9 @@ public class RobotContainer {
 
     configureBindings();
   }
-
+/**sets the bindings of the robot */
   private void configureBindings() {
+    // sets bindings of the driver
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,

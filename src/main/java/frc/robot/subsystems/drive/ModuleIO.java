@@ -17,7 +17,7 @@ public interface ModuleIO {
     public ModuleIOData data =
         new ModuleIOData(false, 0, 0, 0, false, Rotation2d.kZero, 0, 0, 0, 0);
   }
-
+  /** records data for modules */
   public record ModuleIOData(
       boolean driveConnected,
       double drivePositionRad,

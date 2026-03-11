@@ -18,11 +18,11 @@ public class ModuleIOSim implements ModuleIO {
       new DCMotorSim(
           LinearSystemId.createDCMotorSystem(
               driveMotorModel, 0.025, DriveConstants.kDriveGearRatio),
-          driveMotorModel);
+          driveMotorModel); //sims the drive motor
   private DCMotorSim turnMotorSim =
       new DCMotorSim(
           LinearSystemId.createDCMotorSystem(turnMotorModel, 0.004, DriveConstants.kAngleGearRatio),
-          turnMotorModel);
+          turnMotorModel); //sims the turn motor
 
   private boolean driveClosedLoop = false;
   private boolean turnClosedLoop = false;
@@ -35,11 +35,12 @@ public class ModuleIOSim implements ModuleIO {
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;
 
+  /**sims the module turn */
   public ModuleIOSim() {
     // driveFFModel = new SimpleMotorFeedforward(0.0, 0.05);
     turnController.enableContinuousInput(-Math.PI, Math.PI);
   }
-
+//#region input updating
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
     if (driveClosedLoop) {
@@ -72,20 +73,22 @@ public class ModuleIOSim implements ModuleIO {
             driveMotorSim.getCurrentDrawAmps(),
             turnMotorSim.getCurrentDrawAmps());
   }
-
-  @Override
+//#endregion input updating  
+@Override
   public void runDriveDutyCycle(double percentOutput) {
     driveClosedLoop = false;
     driveAppliedVolts = percentOutput * 12;
   }
 
   @Override
+    /**sims the turn cycle */
   public void runTurnDutyCycle(double percentOutput) {
     turnClosedLoop = false;
     turnAppliedVolts = percentOutput * 12;
   }
 
   @Override
+    /**sims the velocity */
   public void runDriveVelocity(double velocityRadPerSec) {
     driveClosedLoop = true;
     driveFFVolts = 0.75 * driveFFModel.calculate(velocityRadPerSec);
@@ -93,6 +96,7 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
+    /**sims the angle*/
   public void runTurnAngle(Rotation2d angle) {
     turnClosedLoop = true;
     turnController.setSetpoint(angle.getRadians());

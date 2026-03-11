@@ -29,7 +29,12 @@ public class Drive extends SubsystemBase {
 
   private Rotation2d rawGyroRotation = new Rotation2d();
   static final Lock m_odometryLock = new ReentrantLock();
-
+  /**
+           * creates the modules of the drivetrain
+           * front left, back left, back right, and front right
+           *  as well as the gyro
+     and makes them run
+           */
   public Drive(SwerveMod[] modules, GyroIO gyroIO) {
     this.modules = modules;
     this.gyroIO = gyroIO;
@@ -72,12 +77,12 @@ public class Drive extends SubsystemBase {
 
     if (DriverStation.isDisabled()) {
       for (SwerveMod mod : modules) {
-        mod.stop();
+        mod.stop(); //stops driving when drivierstation is disabled
       }
     }
 
     SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-
+    //gets position of each wheel
     for (int i = 0; i < 4; i++) {
       SwerveModulePosition current = modules[i].getPosition();
       moduleDeltas[i] =
@@ -85,7 +90,7 @@ public class Drive extends SubsystemBase {
               current.distanceMeters - lastModulePositions[i].distanceMeters, current.angle);
       lastModulePositions[i] = current;
     }
-
+    // gets values of gyros if connnected, and if not, makes them connected
     if (gyroInputs.data.connected()) {
       rawGyroRotation = gyroInputs.data.yawPosition();
     } else {
@@ -93,7 +98,11 @@ public class Drive extends SubsystemBase {
       rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
     }
   }
-
+  /**
+   * sets states of hthe modules so they turn good
+   * @param speeds uses the speeds of the modules to get their states
+   * @param isOpenLoop because false runs as velocity closed loop to set states
+   */
   public void runVelocity(ChassisSpeeds speeds, boolean isOpenLoop) {
     // ChassisSpeeds newSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     var states = DriveConstants.swerveKinematics.toSwerveModuleStates(speeds);
@@ -111,7 +120,9 @@ public class Drive extends SubsystemBase {
       mod.stop();
     }
   }
-
+  /** gets the yaw velocity of the gyro
+   * @return the velocity of the yaw in radpersec
+   */
   public double getYawVelocity() {
     return this.gyroInputs.data.yawVelocityRadPerSec();
   }
@@ -124,7 +135,7 @@ public class Drive extends SubsystemBase {
    */
   public SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-
+    
     for (int i = 0; i < modules.length; i++) {
       modulePositions[i] = modules[i].getPosition();
     }
