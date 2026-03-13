@@ -21,7 +21,9 @@ public class SwerveMod {
     this.io = io;
     this.name = name;
   }
-
+/**
+ * runs while robot is running every 0.02 seconds
+ */
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Drive/Module/" + name.toString(), inputs);

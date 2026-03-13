@@ -21,7 +21,9 @@ public class RobotState {
 
   /** Pose Estimator */
   private SwerveDrivePoseEstimator poseEstimator;
-
+  /**
+   * establishes what the state of the robot is relative to where it started
+   */
   private RobotState() {
     poseEstimator =
         new SwerveDrivePoseEstimator(
@@ -49,7 +51,10 @@ public class RobotState {
 
     Logger.recordOutput("RobotState/EstimatedPose", poseEstimator.getEstimatedPosition());
   }
-
+/**
+ * adds the vision measurements to the pose estimator and logs it
+ * @param measurement measures where it is based off its vision
+ */
   public void addVisionMeasurement(VisionMeasurement measurement) {
     poseEstimator.addVisionMeasurement(
         measurement.visionPose().toPose2d(), measurement.timestamp(), measurement.stdDevs());
@@ -57,7 +62,9 @@ public class RobotState {
     Logger.recordOutput("RobotState/EstimatedPose", poseEstimator.getEstimatedPosition());
   }
 
-  /** Reset pose estimate and align gyro frame to the given pose. */
+  /** Reset pose estimate and align gyro frame to the given pose.
+   * @param pose takes in the previous pose so that it can be realigned
+   */
   public void resetPose(Pose2d pose) {
 
     poseEstimator.resetPose(pose);
@@ -69,9 +76,9 @@ public class RobotState {
   public Pose2d getEstimatedPose() {
     return poseEstimator.getEstimatedPosition();
   }
-
+  //recoreds the odometry observaiton
   public record OdometryObservation(
       double timestamp, SwerveModulePosition[] modulePositions, Rotation2d gyroAngle) {}
-
+  //records the visionmeasurements
   public record VisionMeasurement(double timestamp, Pose3d visionPose, Matrix<N3, N1> stdDevs) {}
 }
