@@ -54,7 +54,10 @@ public class Intake extends SubsystemBase {
         () -> io.setWheelSpeed(0.0),
         this);
   }
-
+/**
+ * makes it go faster
+ * @return runs the feeder at a speed on every iteration until end when it stops the running
+ */
   public Command intakeSignificantlyFaster() {
     return Commands.runEnd(
         () -> io.setWheelSpeed(IntakeConstants.kRollerMotorSpeed),

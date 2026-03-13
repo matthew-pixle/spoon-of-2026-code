@@ -20,12 +20,13 @@ public class IntakeIOSim implements IntakeIO {
   private double wheelAppliedVolts = 0.0;
 
   public IntakeIOSim() {
+    //creates the pivot sim
     pivotSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
                 pivotGearbox, 0.025, IntakeConstants.kPivotMotorGearRatio),
             pivotGearbox);
-
+    //creates the wheel sim
     wheelSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
@@ -35,7 +36,7 @@ public class IntakeIOSim implements IntakeIO {
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-
+    //applies volts to the inputs for pivot and wheel
     pivotAppliedVolts = MathUtil.clamp(pivotAppliedVolts, -12.0, 12.0);
     wheelAppliedVolts = MathUtil.clamp(wheelAppliedVolts, -12.0, 12.0);
 
@@ -44,7 +45,7 @@ public class IntakeIOSim implements IntakeIO {
 
     wheelSim.setInputVoltage(wheelAppliedVolts);
     wheelSim.update(0.02);
-
+    //applies position and velocity to the inputs for pivot and wheel
     inputs.pivotPositionRad = Units.rotationsToRadians(pivotSim.getAngularPositionRotations());
     inputs.pivotVelocityRadPerSec = Units.rotationsToRadians(pivotSim.getAngularVelocityRPM());
 
