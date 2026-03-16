@@ -34,16 +34,22 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
+  //creates a lock for the odometry
   static final Lock odometryLock = new ReentrantLock();
+  //creates a gyro input/output
   private final GyroIO gyroIO;
+  //logs the gyroinpurts
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+  //makes wheel modules
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
+  //makes an id for a mechanism ig i don't know
   private final SysIdRoutine sysId;
+  //makes an alert if the gyro disconnects
   private final Alert gyroDisconnectedAlert =
       new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
-
+//makes somekinematics
   private final SwerveDriveKinematics kinematics = DriveConstants.kSwerveKinematics;
-
+//zeros gyro
   private Rotation2d rawGyroRotation = Rotation2d.kZero;
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
@@ -54,11 +60,11 @@ public class Drive extends SubsystemBase {
       };
 
   public Drive(
-      GyroIO gyroIO,
-      ModuleIO flModuleIO,
-      ModuleIO frModuleIO,
-      ModuleIO blModuleIO,
-      ModuleIO brModuleIO) {
+      GyroIO gyroIO,/*makes inputoutput for gyro*/
+      ModuleIO flModuleIO,/*makes inputoutput for modules*/
+      ModuleIO frModuleIO,/*makes inputoutput for modules*/
+      ModuleIO blModuleIO,/*makes inputoutput for modules*/
+      ModuleIO brModuleIO/*makes inputoutput for modules*/) {
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
@@ -91,7 +97,7 @@ public class Drive extends SubsystemBase {
     for (var module : modules) {
       module.periodic();
     }
-    odometryLock.unlock();
+    odometryLock.unlock();// resumes odometry updates when reading data is completed
 
     // Stop moving when disabled
     if (DriverStation.isDisabled()) {
