@@ -85,8 +85,8 @@ public class ModuleIOSim implements ModuleIO {
     // Update simulation state
     driveSim.setInputVoltage(MathUtil.clamp(driveAppliedVolts, -12.0, 12.0));
     turnSim.setInputVoltage(MathUtil.clamp(turnAppliedVolts, -12.0, 12.0));
-    driveSim.update(0.02);
-    turnSim.update(0.02);
+    driveSim.update(0.02);//sims voltage every 0.02 seconds
+    turnSim.update(0.02);//sims voltage every 0.02 seconds
 
     // Update drive inputs
     inputs.driveConnected = true;
@@ -112,18 +112,21 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
+  //runs the motor at the desired value assuming the loop is open
   public void setDriveOpenLoop(double output) {
     driveClosedLoop = false;
     driveAppliedVolts = output;
   }
 
   @Override
+  //turns the motor at the desired value assuming the loop is open
   public void setTurnOpenLoop(double output) {
     turnClosedLoop = false;
     turnAppliedVolts = output;
   }
 
   @Override
+  //sets the drive velocity directly if the loop is closed
   public void setDriveVelocity(double velocityRadPerSec) {
     driveClosedLoop = true;
     driveFFVolts = DRIVE_KS * Math.signum(velocityRadPerSec) + DRIVE_KV * velocityRadPerSec;
@@ -131,6 +134,7 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
+  //sets the turn rotation if the loop is closed
   public void setTurnPosition(Rotation2d rotation) {
     turnClosedLoop = true;
     turnController.setSetpoint(rotation.getRadians());

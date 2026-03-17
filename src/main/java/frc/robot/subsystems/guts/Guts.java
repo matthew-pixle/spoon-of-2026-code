@@ -4,10 +4,11 @@
 
 package frc.robot.subsystems.guts;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.littletonrobotics.junction.Logger;
 
 /**
  * This class updates and stores the values of the inputs periodically, and contains commands to run

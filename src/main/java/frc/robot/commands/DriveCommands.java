@@ -32,11 +32,13 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class DriveCommands {
-  private static final double DEADBAND = 0.1; //area where controller inputs don't get counted
-  private static final double ANGLE_KP = 7.0; //proportional coefficient for pid
+  private static final double DEADBAND = 0.1; // area where controller inputs don't get counted
+  private static final double ANGLE_KP = 7.0; // proportional coefficient for pid
   private static final double ANGLE_KD = 0.3; // derivative coefficien for pid
-  private static final double ANGLE_MAX_VELOCITY = 8.0; //max velocity of turning inputs meters per sectond
-  private static final double ANGLE_MAX_ACCELERATION = 20.0; //max acceleration meters per second squared
+  private static final double ANGLE_MAX_VELOCITY =
+      8.0; // max velocity of turning inputs meters per sectond
+  private static final double ANGLE_MAX_ACCELERATION =
+      20.0; // max acceleration meters per second squared
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
@@ -47,7 +49,7 @@ public class DriveCommands {
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband to velocity ig
     double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
-    //sets direction in radians
+    // sets direction in radians
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
     // Square magnitude for more precise control
@@ -85,7 +87,7 @@ public class DriveCommands {
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                   omega * drive.getMaxAngularSpeedRadPerSec());
-// finally runs the drive
+          // finally runs the drive
           drive.runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds, AllianceFlipUtil.apply(drive.getRawGyroRotation())));
@@ -154,28 +156,28 @@ public class DriveCommands {
             new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
     angleController.enableContinuousInput(-Math.PI, Math.PI);
     angleController.setTolerance(Math.toRadians(2.0));
-//runs robot
+    // runs robot
     return Commands.run(
             () -> {
-              //gets where robot is on field
+              // gets where robot is on field
               Pose2d robotPose = robotPoseSupplier.get();
-              //gets the position of the target on the field
+              // gets the position of the target on the field
               Translation2d target = AllianceFlipUtil.apply(targetSupplier.get());
-              //how much the robot needs to move to get the right position
+              // how much the robot needs to move to get the right position
               Translation2d delta = target.minus(robotPose.getTranslation());
-              //what the actual angle it needs to be at based on delta
+              // what the actual angle it needs to be at based on delta
               Rotation2d targetAngle = new Rotation2d(Math.atan2(delta.getY(), delta.getX()));
-              //angular velocity to achieve that angle calculating based on pid
+              // angular velocity to achieve that angle calculating based on pid
               double omega =
                   angleController.calculate(
                       drive.getRawGyroRotation().getRadians(), targetAngle.getRadians());
-              //running drive at calculated angular velocity but converted to m/s
+              // running drive at calculated angular velocity but converted to m/s
               drive.runVelocity(new ChassisSpeeds(0, 0, omega));
             },
             drive)
-            //runs until the robot has turned enough
+        // runs until the robot has turned enough
         .until(angleController::atGoal)
-        //resets robot pid before running
+        // resets robot pid before running
         .beforeStarting(() -> angleController.reset(drive.getRawGyroRotation().getRadians()));
   }
 
@@ -184,9 +186,9 @@ public class DriveCommands {
         () -> {
           // TODO: tune ts
           double speed = 1.0; // meters per second (tune this)
-          //sets speeds of robot to have the same direction for all wheels
+          // sets speeds of robot to have the same direction for all wheels
           ChassisSpeeds speeds = direction.toChassisSpeeds().times(speed);
-          //runs at the speeds
+          // runs at the speeds
           drive.runVelocity(speeds);
         });
   }
@@ -199,12 +201,12 @@ public class DriveCommands {
    * <p>This command should only be used in voltage control mode.
    */
   public static Command feedforwardCharacterization(Drive drive) {
-    //gets velocity of the velocities of the drive motors
+    // gets velocity of the velocities of the drive motors
     List<Double> velocitySamples = new LinkedList<>();
-    //gets votalges of the drive motors
+    // gets votalges of the drive motors
     List<Double> voltageSamples = new LinkedList<>();
-    Timer timer = new Timer(); //makes timer ok got it (pls) ow
-//comand sequence to measure these constants
+    Timer timer = new Timer(); // makes timer ok got it (pls) ow
+    // comand sequence to measure these constants
     return Commands.sequence(
         // Reset data
         Commands.runOnce(
@@ -260,7 +262,7 @@ public class DriveCommands {
 
   /** Measures the robot's wheel radius by spinning in a circle. */
   public static Command wheelRadiusCharacterization(Drive drive) {
-    //sets a limit based of the constant at the beggening
+    // sets a limit based of the constant at the beggening
     SlewRateLimiter limiter = new SlewRateLimiter(WHEEL_RADIUS_RAMP_RATE);
     WheelRadiusCharacterizationState state = new WheelRadiusCharacterizationState();
 

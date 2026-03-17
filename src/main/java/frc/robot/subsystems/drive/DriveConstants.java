@@ -34,13 +34,13 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Voltage;
 
 public final class DriveConstants {
-    //establishes a kinematics for drife
+  // establishes a kinematics for drife
   public static final SwerveDriveKinematics kSwerveKinematics =
       new SwerveDriveKinematics(Drive.getModuleTranslations());
-    //makes the odometry have frequency in hz based off if it has FDor if its just CAN bus
+  // makes the odometry have frequency in hz based off if it has FDor if its just CAN bus
   public static final double kOdometryFrequency =
       TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
-    //sets radius of the base
+  // sets radius of the base
   public static final double kDriveBaseRadius =
       Math.max(
           Math.max(
@@ -64,7 +64,7 @@ public final class DriveConstants {
   public static final double kRobotMOI = 6.883;
   /** Coefficient of friction */
   public static final double kWheelCOF = 1.2;
-//config for pathplanner
+  // config for pathplanner
   public static final RobotConfig kPathplannerConfig =
       new RobotConfig(
           kRobotMOI,
@@ -105,7 +105,7 @@ public final class DriveConstants {
     private static final ClosedLoopOutputType kSteerClosedLoopOutput = ClosedLoopOutputType.Voltage;
     // The closed-loop output type to use for the drive motors;
     // This affects the PID/FF gains for the drive motors
-    
+
     private static final ClosedLoopOutputType kDriveClosedLoopOutput = ClosedLoopOutputType.Voltage;
 
     // The type of motor used for the drive motor

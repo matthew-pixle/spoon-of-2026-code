@@ -13,11 +13,11 @@ import org.littletonrobotics.junction.AutoLog;
 public interface GyroIO {
   @AutoLog
   public static class GyroIOInputs {
-    public boolean connected = false;
-    public Rotation2d yawPosition = Rotation2d.kZero;
-    public double yawVelocityRadPerSec = 0.0;
-    public double[] odometryYawTimestamps = new double[] {};
-    public Rotation2d[] odometryYawPositions = new Rotation2d[] {};
+    public boolean connected = false; //determines if gyro is connected
+    public Rotation2d yawPosition = Rotation2d.kZero; //records yaw position in degrees
+    public double yawVelocityRadPerSec = 0.0; //records yaw velocity in rad/sec
+    public double[] odometryYawTimestamps = new double[] {}; //i think it creates timestamps for the odometry relating to yaw
+    public Rotation2d[] odometryYawPositions = new Rotation2d[] {}; // records th odometry for the yaw positions
   }
 
   public default void updateInputs(GyroIOInputs inputs) {}

@@ -6,7 +6,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 public class GutsIOSim implements GutsIO {
-  private final DCMotor gearbox = DCMotor.getNEO(1); //makes a neo gearbox fo the guts
+  private final DCMotor gearbox = DCMotor.getNEO(1); // makes a neo gearbox fo the guts
   private final DCMotorSim sim;
 
   // private final PIDController pid = new PIDController(1, 0, 0, Constants.kLoopPeriodSeconds);
@@ -22,7 +22,7 @@ public class GutsIOSim implements GutsIO {
 
   @Override
   public void updateInputs(GutsIOInputs inputs) {
-//sets max values for the volts
+    // sets max values for the volts
     appliedVolts = MathUtil.clamp(appliedVolts, -12.0, 12.0);
 
     sim.setInputVoltage(appliedVolts);
@@ -34,6 +34,6 @@ public class GutsIOSim implements GutsIO {
 
   @Override
   public void setGutMotorSpeed(double speed) {
-    appliedVolts = 12 * speed; //sets the applied volts based off the target speed
+    appliedVolts = 12 * speed; // sets the applied volts based off the target speed
   }
 }

@@ -19,7 +19,7 @@ public class GyroIONavX implements GyroIO {
       new AHRS(NavXComType.kMXP_SPI, (byte) DriveConstants.kOdometryFrequency);
   private final Queue<Double> yawPositionQueue;
   private final Queue<Double> yawTimestampQueue;
-
+//creates method to make odometries for the yaw timestamps and positions
   public GyroIONavX() {
     yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
     yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(navX::getYaw);
@@ -27,9 +27,9 @@ public class GyroIONavX implements GyroIO {
 
   @Override
   public void updateInputs(GyroIOInputs inputs) {
-    inputs.connected = navX.isConnected();
-    inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw());
-    inputs.yawVelocityRadPerSec = Units.degreesToRadians(-navX.getRawGyroZ());
+    inputs.connected = navX.isConnected();// chekcs if nav is connected
+    inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw());//gets the position (degrees)
+    inputs.yawVelocityRadPerSec = Units.degreesToRadians(-navX.getRawGyroZ());//gets the radians persec of the yaw
 
     inputs.odometryYawTimestamps =
         yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();

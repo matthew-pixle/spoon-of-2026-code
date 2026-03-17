@@ -4,10 +4,11 @@
 
 package frc.robot.subsystems.intake;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
   /** Creates a new Intake. */
@@ -54,10 +55,11 @@ public class Intake extends SubsystemBase {
         () -> io.setWheelSpeed(0.0),
         this);
   }
-/**
- * makes it go faster
- * @return runs the feeder at a speed on every iteration until end when it stops the running
- */
+  /**
+   * makes it go faster
+   *
+   * @return runs the feeder at a speed on every iteration until end when it stops the running
+   */
   public Command intakeSignificantlyFaster() {
     return Commands.runEnd(
         () -> io.setWheelSpeed(IntakeConstants.kRollerMotorSpeed),

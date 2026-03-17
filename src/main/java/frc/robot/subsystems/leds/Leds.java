@@ -15,12 +15,12 @@ public class Leds extends SubsystemBase {
   public static Leds getInstance() {
     return instance;
   }
-//creates leds and buffer
+  // creates leds and buffer
   private final AddressableLED leds = new AddressableLED(LedConstants.kPort);
   private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(LedConstants.kFullLength);
-//starts leds section
+  // starts leds section
   public record Section(int start, int end) {}
-//starts enums
+  // starts enums
   public enum LedSection {
     ALL(new Section(0, LedConstants.kFullLength - 1)),
     ALL_LEFT(
@@ -50,17 +50,19 @@ public class Leds extends SubsystemBase {
             LedConstants.kFullLength));
 
     private final Section section;
-/**
- * sets the section of the leds
- * @param section section of the leds that turn on
- */
+    /**
+     * sets the section of the leds
+     *
+     * @param section section of the leds that turn on
+     */
     private LedSection(Section section) {
       this.section = section;
     }
-/**
- * gets the section
- * @return returns the section 
- */
+    /**
+     * gets the section
+     *
+     * @return returns the section
+     */
     public Section getSection() {
       return section;
     }
@@ -74,11 +76,11 @@ public class Leds extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (RobotState.isAutonomous()) {//sets auto led color
+    if (RobotState.isAutonomous()) { // sets auto led color
       solid(LedSection.ALL, Color.kOrange);
-    } else if (RobotState.isDisabled()) {//sets off led color
+    } else if (RobotState.isDisabled()) { // sets off led color
       breath(LedSection.ALL, Color.kRed, Color.kBlack, 3);
-    } else { //sets teleop color
+    } else { // sets teleop color
       solid(LedSection.ALL, Color.kAqua);
     }
     // solid(LedSection.TOP_LEFT_TURRET, Color.kLimeGreen);
@@ -88,6 +90,7 @@ public class Leds extends SubsystemBase {
   }
   /**
    * cycles through different solid colors if i am correct i could be wrong
+   *
    * @param section the section of which the leds are in
    * @param color sets the input color for the time which it sets color
    */
@@ -97,24 +100,26 @@ public class Leds extends SubsystemBase {
       buffer.setLED(i, color);
     }
   }
-/**
- * stobes colors
- * @param section sets the section of the leds
- * @param c1 sets the first color of the strobe
- * @param c2 sets the second color of the strob
- * @param duration sets how long strobes
- */
+  /**
+   * stobes colors
+   *
+   * @param section sets the section of the leds
+   * @param c1 sets the first color of the strobe
+   * @param c2 sets the second color of the strob
+   * @param duration sets how long strobes
+   */
   public void strobe(LedSection section, Color c1, Color c2, double duration) {
     boolean useFirst = ((Timer.getTimestamp() % duration) / duration) > 0.5;
     solid(section, useFirst ? c1 : c2);
   }
-/**
- * makes coloros breath (fade in and out sinewavy like yk)
- * @param section sets the section of the leds it goes
- * @param c1 sets the first color of it
- * @param c2 sets the second color of the breathe
- * @param duration sets the time it breathes
- */
+  /**
+   * makes coloros breath (fade in and out sinewavy like yk)
+   *
+   * @param section sets the section of the leds it goes
+   * @param c1 sets the first color of it
+   * @param c2 sets the second color of the breathe
+   * @param duration sets the time it breathes
+   */
   public void breath(LedSection section, Color c1, Color c2, double duration) {
     double x = ((Timer.getTimestamp() % duration) / duration) * 2.0 * Math.PI;
     double ratio = (Math.sin(x) + 1.0) / 2.0;
@@ -127,12 +132,13 @@ public class Leds extends SubsystemBase {
 
     solid(section, mixed);
   }
-/**
- * sets the leds to a cycling rainbow
- * @param section section of leds
- * @param cycleLength sets time between cycles
- * @param duration  sets tyme it rainbows
- */
+  /**
+   * sets the leds to a cycling rainbow
+   *
+   * @param section section of leds
+   * @param cycleLength sets time between cycles
+   * @param duration sets time it rainbows
+   */
   public void rainbow(LedSection section, double cycleLength, double duration) {
     Section s = section.getSection();
     double baseHue = (1 - ((Timer.getTimestamp() / duration) % 1.0)) * 180.0;
@@ -143,14 +149,15 @@ public class Leds extends SubsystemBase {
       buffer.setHSV(i, hue, 255, 255);
     }
   }
-/**
- * makes the colors wave
- * @param section section of leds used
- * @param c1 first color of wave
- * @param c2 second color of wave
- * @param cycleLength length of a wave
- * @param duration duration of waving
- */
+  /**
+   * makes the colors wave
+   *
+   * @param section section of leds used
+   * @param c1 first color of wave
+   * @param c2 second color of wave
+   * @param cycleLength length of a wave
+   * @param duration duration of waving
+   */
   public void wave(LedSection section, Color c1, Color c2, double cycleLength, double duration) {
     Section s = section.getSection();
     double x = (1 - ((Timer.getTimestamp() % duration) / duration)) * 2.0 * Math.PI;
@@ -171,6 +178,7 @@ public class Leds extends SubsystemBase {
   }
   /**
    * makes stripes for the leds
+   *
    * @param section section of leds being used
    * @param colors list of stripe colors
    * @param stripeLength how long stripes are
