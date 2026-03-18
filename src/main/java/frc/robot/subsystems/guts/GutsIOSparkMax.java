@@ -20,7 +20,7 @@ public class GutsIOSparkMax implements GutsIO {
   private final SparkMax gutMotor;
   private final RelativeEncoder gutEncoder;
   private final SparkMaxConfig gutMotorConfig;
-
+  //creates an IO for the guts sparkmax
   public GutsIOSparkMax(int motorID) {
     gutMotor = new SparkMax(motorID, MotorType.kBrushless);
     gutEncoder = gutMotor.getEncoder();
@@ -36,9 +36,13 @@ public class GutsIOSparkMax implements GutsIO {
 
   @Override
   public void updateInputs(GutsIOInputs inputs) {
+    //inputs the radpersec of the sparkmax into the sim
     inputs.velocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(gutEncoder.getVelocity());
+    //inputs the position of of the sparkmax into the sim
     inputs.positionRad = Units.rotationsToRadians(gutEncoder.getPosition());
+    //gets the volts of the volts of the motor
     inputs.appliedVolts = gutMotor.getAppliedOutput();
+    //gets the amps for the sim
     inputs.currentDrawAmps = gutMotor.getOutputCurrent();
   }
 }

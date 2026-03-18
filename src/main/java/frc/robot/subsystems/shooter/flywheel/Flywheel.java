@@ -34,11 +34,11 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Shooter/" + side.getName() + "/Flywheel", inputs);
-    Logger.recordOutput("Shooter/" + side.getName() + "/Flywheel/AtGoal", atGoal);
+    Logger.processInputs("Shooter/" + side.getName() + "/Flywheel", inputs); //adds inputs to the shooter sim
+    Logger.recordOutput("Shooter/" + side.getName() + "/Flywheel/AtGoal", atGoal); //adds t the sim if the robot is at its goal
 
-    SmartDashboard.putNumber("Flywheel Velo", getVelocity());
-    SmartDashboard.putNumber("Flywheel Setpoint", goalRPM);
+    SmartDashboard.putNumber("Flywheel Velo", getVelocity()); //adds the velocity of the flywheel to a list
+    SmartDashboard.putNumber("Flywheel Setpoint", goalRPM); //add
   }
 
   public Command runVelocity(double velocityRPM) {

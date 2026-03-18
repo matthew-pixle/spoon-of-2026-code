@@ -12,7 +12,7 @@ public class GutsIOSim implements GutsIO {
   // private final PIDController pid = new PIDController(1, 0, 0, Constants.kLoopPeriodSeconds);
 
   private double appliedVolts = 0.0;
-
+  //creates new sim for guts
   public GutsIOSim() {
     sim =
         new DCMotorSim(
@@ -24,11 +24,12 @@ public class GutsIOSim implements GutsIO {
   public void updateInputs(GutsIOInputs inputs) {
     // sets max values for the volts
     appliedVolts = MathUtil.clamp(appliedVolts, -12.0, 12.0);
-
+    //applies volts to the sim
     sim.setInputVoltage(appliedVolts);
     sim.update(0.02);
-
+    //sets the radians for position rotations
     inputs.positionRad = sim.getAngularPositionRotations();
+    //sets the velocity for guts RPM
     inputs.velocityRadPerSec = sim.getAngularVelocityRPM();
   }
 
