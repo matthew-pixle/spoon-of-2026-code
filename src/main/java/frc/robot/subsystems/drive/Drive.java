@@ -60,10 +60,10 @@ public class Drive extends SubsystemBase {
 
   public Drive(
       GyroIO gyroIO, /*makes inputoutput for gyro*/
-      ModuleIO flModuleIO, /*makes inputoutput for modules*/
-      ModuleIO frModuleIO, /*makes inputoutput for modules*/
-      ModuleIO blModuleIO, /*makes inputoutput for modules*/
-      ModuleIO brModuleIO /*makes inputoutput for modules*/) {
+      ModuleIO flModuleIO, /*makes inputoutput for front left*/
+      ModuleIO frModuleIO, /*makes inputoutput for front right*/
+      ModuleIO blModuleIO, /*makes inputoutput for back left*/
+      ModuleIO brModuleIO /*makes inputoutput for back right*/) {
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);

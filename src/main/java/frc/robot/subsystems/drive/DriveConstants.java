@@ -155,14 +155,14 @@ public final class DriveConstants {
     // This may need to be tuned to your individual robot
     private static final double kCoupleRatio = 3.375;
 
-    private static final double kDriveGearRatio = 5.2734375;
-    private static final double kSteerGearRatio = 26.09090909090909;
-    private static final Distance kWheelRadius = Inches.of(2);
+    private static final double kDriveGearRatio = 5.2734375;//ratio for the drive and gear
+    private static final double kSteerGearRatio = 26.09090909090909;//ratio for the steer and geer
+    private static final Distance kWheelRadius = Inches.of(2);//radius of the wheel
 
-    private static final boolean kInvertLeftSide = false;
-    private static final boolean kInvertRightSide = true;
+    private static final boolean kInvertLeftSide = false; //left side is not inverted
+    private static final boolean kInvertRightSide = true; //right side is inverted
 
-    private static final int kPigeonId = 23;
+    private static final int kPigeonId = 23; //id for the pigeon
 
     // These are only used for simulation
     private static final MomentOfInertia kSteerInertia = KilogramSquareMeters.of(0.01);
