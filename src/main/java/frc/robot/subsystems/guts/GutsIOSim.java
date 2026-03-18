@@ -27,14 +27,12 @@ public class GutsIOSim implements GutsIO {
     //applies volts to the sim
     sim.setInputVoltage(appliedVolts);
     sim.update(0.02);
-    //sets the radians for position rotations
-    inputs.positionRad = sim.getAngularPositionRotations();
-    //sets the velocity for guts RPM
+
     inputs.velocityRadPerSec = sim.getAngularVelocityRPM();
   }
 
   @Override
-  public void setGutMotorSpeed(double speed) {
+  public void setOpenLoop(double speed) {
     appliedVolts = 12 * speed; // sets the applied volts based off the target speed
   }
 }

@@ -10,7 +10,6 @@ import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.RobotState;
-import frc.robot.subsystems.shooter.Shooter.ShooterSide;
 import frc.robot.subsystems.shooter.ShooterConstants.TurretConstants;
 import frc.robot.util.GeomUtil;
 import org.littletonrobotics.junction.Logger;
@@ -24,14 +23,15 @@ public class TrajectoryCalculator {
   private static final double MAX_SHOOTING_DISTANCE = 5.0;
 
   static {
-    shooterTable.put(1.5, new TrajectoryParams(2800.0, 35.0, 0.38));
-    shooterTable.put(2.0, new TrajectoryParams(3100.0, 38.0, 0.45));
-    shooterTable.put(2.6289, new TrajectoryParams(5000.0, 42.0, 0.52));
-    shooterTable.put(3.0, new TrajectoryParams(3650.0, 46.0, 0.60));
-    shooterTable.put(3.5, new TrajectoryParams(3900.0, 50.0, 0.68));
-    shooterTable.put(4.0, new TrajectoryParams(4100.0, 54.0, 0.76));
-    shooterTable.put(4.5, new TrajectoryParams(4350.0, 58.0, 0.85));
-    shooterTable.put(5.0, new TrajectoryParams(4550.0, 62.0, 0.94));
+    shooterTable.put(1.5, new TrajectoryParams(2800.0, 0, 0.38));
+    shooterTable.put(2.0, new TrajectoryParams(3100.0, 0.0349, 0.45));
+    shooterTable.put(2.5, new TrajectoryParams(3250.0, 0.0698, 0.52));
+    shooterTable.put(3.0, new TrajectoryParams(3650.0, 0.104, 0.60));
+    shooterTable.put(3.5, new TrajectoryParams(3900.0, 0.1396, 0.68));
+    shooterTable.put(4.0, new TrajectoryParams(4100.0, 0.174, 0.76));
+    shooterTable.put(4.5, new TrajectoryParams(4350.0, 0.209, 0.85));
+    shooterTable.put(5.0, new TrajectoryParams(4550.0, 0.244, 0.94));
+    shooterTable.put(5.5, new TrajectoryParams(4550.0, 0.279, 1.05));
   }
 
   // ========== PUBLIC API ==========
@@ -40,24 +40,17 @@ public class TrajectoryCalculator {
    * Calculate shooter command for a single shooter. Use this when only one shooter needs
    * calculation.
    */
-  public static ShooterCommand calculate(ShooterSide side, Translation2d targetLocation) {
+  public static ShooterCommand calculate(Translation2d targetLocation) {
     RobotStateData state = getCompensatedRobotState();
-    return calculateWithState(side, targetLocation, state);
+    return calculateWithState(targetLocation, state);
   }
 
   public static double calculateRPM(Translation2d targetLocation, Pose2d robotPose) {
     return shooterTable.get(targetLocation.getDistance(robotPose.getTranslation())).wheelRPM;
   }
 
-  /**
-   * Calculate shooter commands for both shooters efficiently. Use this when both shooters need
-   * calculation - avoids duplicate state queries.
-   */
-  public static DualShooterCommands calculateBoth(Translation2d targetLocation) {
-    RobotStateData state = getCompensatedRobotState();
-    return new DualShooterCommands(
-        calculateWithState(ShooterSide.LEFT, targetLocation, state),
-        calculateWithState(ShooterSide.RIGHT, targetLocation, state));
+  public static double calculateHoodAngle(Translation2d targetLocation, Pose2d robotPose) {
+    return 20 * shooterTable.get(targetLocation.getDistance(robotPose.getTranslation())).hoodAngle;
   }
 
   // ========== PRIVATE IMPLEMENTATION ==========
@@ -80,20 +73,10 @@ public class TrajectoryCalculator {
 
   /** Calculate shooter command for a specific side using pre-computed robot state. */
   private static ShooterCommand calculateWithState(
-      ShooterSide side, Translation2d targetLocation, RobotStateData state) {
+      Translation2d targetLocation, RobotStateData state) {
 
     // 2. Identify Turret Offset and Position
-    Transform3d robotToTurret;
-    switch (side) {
-      case LEFT:
-        robotToTurret = TurretConstants.kRobotToLeftTurret;
-        break;
-      case RIGHT:
-        robotToTurret = TurretConstants.kRobotToRightTurret;
-      default:
-        robotToTurret = new Transform3d();
-        break;
-    }
+    Transform3d robotToTurret = TurretConstants.kRobotToTurret;
 
     Pose2d turretPose =
         state.compensatedRobotPose.transformBy(GeomUtil.toTransform2d(robotToTurret));
@@ -135,16 +118,14 @@ public class TrajectoryCalculator {
     Pose2d lookaheadRobotPose =
         lookaheadTurretPose.transformBy(GeomUtil.toTransform2d(robotToTurret).inverse());
 
+    Logger.recordOutput("LaunchCalculator/LookaheadRobotPose", lookaheadRobotPose);
     Logger.recordOutput(
-        "LaunchCalculator/" + side.getName() + "/LookaheadRobotPose", lookaheadRobotPose);
-    Logger.recordOutput(
-        "LaunchCalculator/" + side.getName() + "/ShotVector",
+        "LaunchCalculator/ShotVector",
         new Pose2d(lookaheadRobotPose.getTranslation(), turretAngleField));
-    Logger.recordOutput("LaunchCalculator/" + side.getName() + "/Distance", lookaheadDistance);
+    Logger.recordOutput("LaunchCalculator/Distance", lookaheadDistance);
+    Logger.recordOutput("LaunchCalculator/DistanceClamped", clampedFinalDistance);
     Logger.recordOutput(
-        "LaunchCalculator/" + side.getName() + "/DistanceClamped", clampedFinalDistance);
-    Logger.recordOutput(
-        "LaunchCalculator/" + side.getName() + "/IsInRange",
+        "LaunchCalculator/IsInRange",
         lookaheadDistance >= MIN_SHOOTING_DISTANCE && lookaheadDistance <= MAX_SHOOTING_DISTANCE);
 
     return new ShooterCommand(params.wheelRPM(), params.hoodAngle(), turretAngleRobot);

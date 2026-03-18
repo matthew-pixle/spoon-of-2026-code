@@ -16,30 +16,18 @@ import frc.robot.subsystems.shooter.hood.Hood;
 import frc.robot.subsystems.shooter.hood.HoodIO;
 import frc.robot.subsystems.shooter.turret.Turret;
 import frc.robot.subsystems.shooter.turret.TurretIO;
-import frc.robot.util.AllianceFlipUtil;
-import frc.robot.util.FieldConstants.Hub;
 import java.util.function.Supplier;
 
 public class Shooter extends SubsystemBase {
-  private final ShooterSide side;
-
   private Turret turret;
   private Hood hood;
   private Flywheel flywheel;
 
   /** Creates a new Shooter. */
-  public Shooter(ShooterSide side, TurretIO turretIO, HoodIO hoodIO, FlywheelIO flywheelIO) {
-    this.side = side;
-    this.turret = new Turret(side, turretIO);
-    this.hood = new Hood(side, hoodIO);
-    this.flywheel = new Flywheel(side, flywheelIO);
-  }
-
-  public Shooter(ShooterSide side, HoodIO hoodIO, FlywheelIO flywheelIO) {
-    this.side = side;
-    this.turret = null;
-    this.hood = new Hood(side, hoodIO);
-    this.flywheel = new Flywheel(side, flywheelIO);
+  public Shooter(TurretIO turretIO, HoodIO hoodIO, FlywheelIO flywheelIO) {
+    this.turret = new Turret(turretIO);
+    this.hood = new Hood(hoodIO);
+    this.flywheel = new Flywheel(flywheelIO);
   }
 
   @Override
@@ -51,47 +39,9 @@ public class Shooter extends SubsystemBase {
     flywheel.periodic();
   }
 
-  public static Command shootBothAtHub(Shooter leftShooter, Shooter rightShooter) {
-    return shootBothAtTarget(
-        leftShooter,
-        rightShooter,
-        () -> AllianceFlipUtil.apply(Hub.innerCenterPoint.toTranslation2d()));
-  }
-
   /**
-   * Calculate and apply trajectory parameters for both shooters.
-   *
-   * @param leftShooter The left shooter subsystem.
-   * @param rightShooter The right shooter subsystem.
-   * @param targetSupplier A supplier for the target.
-   * @return A RunCommand applying trajectory parameters to both shooters.
-   */
-  public static Command shootBothAtTarget(
-      Shooter leftShooter, Shooter rightShooter, Supplier<Translation2d> targetSupplier) {
-    return Commands.run(
-        () -> {
-          var cmds = TrajectoryCalculator.calculateBoth(targetSupplier.get());
-          leftShooter.applyCommand(cmds.left());
-          rightShooter.applyCommand(cmds.right());
-        },
-        leftShooter,
-        rightShooter);
-  }
-
-  public static Command shootBothAtTargetNoTurret(
-      Shooter leftShooter, Shooter rightShooter, Supplier<Translation2d> targetSupplier) {
-    return Commands.run(
-        () -> {
-          var cmds = TrajectoryCalculator.calculateBoth(targetSupplier.get());
-          leftShooter.applyCommandNoRotation(cmds.left());
-          rightShooter.applyCommandNoRotation(cmds.right());
-        },
-        leftShooter,
-        rightShooter);
-  }
-
-  /**
-   * Apply a pre-calculated shooter command to this shooter. This does not require the shooter
+   * Apply a pre-calculated shooter command to this shooter. This does not require
+   * the shooter
    * subsystem - use when combining with other shooters.
    *
    * @param cmd The shot parameters to apply.
@@ -112,7 +62,7 @@ public class Shooter extends SubsystemBase {
   public Command shootAtTargetRotation(Supplier<Translation2d> targetSupplier) {
     return Commands.run(
         () -> {
-          ShooterCommand cmd = TrajectoryCalculator.calculate(side, targetSupplier.get());
+          ShooterCommand cmd = TrajectoryCalculator.calculate(targetSupplier.get());
           flywheel.setVelocity(cmd.wheelRPM());
           hood.setAngle(cmd.hoodAngle());
           turret.setPosition(cmd.turretAngle());
@@ -126,7 +76,7 @@ public class Shooter extends SubsystemBase {
   public Command shootAtTargetNoRotation(Supplier<Translation2d> targetSupplier) {
     return Commands.run(
         () -> {
-          ShooterCommand cmd = TrajectoryCalculator.calculate(side, targetSupplier.get());
+          ShooterCommand cmd = TrajectoryCalculator.calculate(targetSupplier.get());
           flywheel.setVelocity(cmd.wheelRPM());
           hood.setAngle(cmd.hoodAngle());
         },
@@ -135,12 +85,12 @@ public class Shooter extends SubsystemBase {
         flywheel);
   }
 
-  public Command trackTarget(Supplier<Translation2d> targetSupplier) {
-    return turret.trackTarget(targetSupplier);
+  public Command hoodDown() {
+    return hood.down();
   }
 
-  public Command zeroTurret() {
-    return turret.zero();
+  public Command trackTarget(Supplier<Translation2d> targetSupplier) {
+    return turret.trackTarget(targetSupplier);
   }
 
   public Command setFlywheelVelocity(double velocityRPM) {
@@ -167,22 +117,15 @@ public class Shooter extends SubsystemBase {
     turret.setOpenLoop(output);
   }
 
-  public ShooterSide getSide() {
-    return side;
+  public void setTurretDefaultCommand(Command defaultCommand) {
+    turret.setDefaultCommand(defaultCommand);
   }
 
-  public enum ShooterSide {
-    LEFT("Left"),
-    RIGHT("Right");
+  public void setHoodDefaultCommand(Command defaultCommand) {
+    hood.setDefaultCommand(defaultCommand);
+  }
 
-    private String name;
-
-    private ShooterSide(String name) {
-      this.name = name;
-    }
-
-    public String getName() {
-      return name;
-    }
+  public void setFlywheelDefaultCommand(Command defaultCommand) {
+    flywheel.setDefaultCommand(defaultCommand);
   }
 }

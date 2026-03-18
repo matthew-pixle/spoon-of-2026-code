@@ -1,14 +1,19 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.FieldConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotState {
@@ -57,6 +62,9 @@ public class RobotState {
         observation.timestamp(), observation.gyroAngle(), observation.modulePositions());
 
     Logger.recordOutput("RobotState/EstimatedPose", poseEstimator.getEstimatedPosition());
+    Logger.recordOutput(
+        "RobotState/EstimatedRotation",
+        poseEstimator.getEstimatedPosition().getRotation().getDegrees());
   }
 
   /**
@@ -65,8 +73,7 @@ public class RobotState {
    * @param measurement A {@link VisionMeasurement} object representing the vision pose estimate.
    */
   public void addVisionMeasurement(VisionMeasurement measurement) {
-    poseEstimator.addVisionMeasurement(
-        measurement.visionPose(), measurement.timestamp(), measurement.stdDevs());
+    poseEstimator.addVisionMeasurement(measurement.visionPose(), measurement.timestamp());
 
     Logger.recordOutput("RobotState/EstimatedPose", poseEstimator.getEstimatedPosition());
   }
@@ -130,6 +137,19 @@ public class RobotState {
 
   public ChassisSpeeds getFieldVelocity() {
     return ChassisSpeeds.fromRobotRelativeSpeeds(robotVelocity, getRotation());
+  }
+
+  public Translation2d getTurretTarget() {
+    Pose2d estimatedPose = getEstimatedPose();
+    if (estimatedPose.getX()
+        < AllianceFlipUtil.applyX(FieldConstants.LinesVertical.neutralZoneNear)) {
+      if (estimatedPose.getY() > AllianceFlipUtil.applyY(FieldConstants.LinesHorizontal.center)) {
+        return AllianceFlipUtil.apply(new Translation2d(Meters.of(2), Meters.of(1)));
+      }
+      return AllianceFlipUtil.apply(
+          new Translation2d(Meters.of(2), Meters.of(FieldConstants.fieldWidth - 1)));
+    }
+    return AllianceFlipUtil.apply(FieldConstants.Hub.innerCenterPoint.toTranslation2d());
   }
 
   public record OdometryObservation(

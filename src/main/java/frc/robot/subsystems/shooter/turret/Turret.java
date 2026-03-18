@@ -12,9 +12,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.RobotContainer;
 import frc.robot.RobotState;
 import frc.robot.RobotVisualizer;
-import frc.robot.subsystems.shooter.Shooter.ShooterSide;
 import frc.robot.subsystems.shooter.ShooterConstants.TurretConstants;
 import frc.robot.subsystems.shooter.turret.TurretIO.TurretIOOutputMode;
 import frc.robot.subsystems.shooter.turret.TurretIO.TurretIOOutputs;
@@ -23,8 +23,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Turret extends FullSubsystem {
-  private final ShooterSide side;
-
   private final TurretIO io;
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
   private final TurretIOOutputs outputs = new TurretIOOutputs();
@@ -34,35 +32,28 @@ public class Turret extends FullSubsystem {
   private boolean atGoal = false;
   private Debouncer atGoalDebouncer = new Debouncer(0.1, DebounceType.kFalling);
 
-  private boolean isZeroed = false;
-
   /** Creates a new Turret. */
-  public Turret(ShooterSide side, TurretIO io) {
-    this.side = side;
+  public Turret(TurretIO io) {
     this.io = io;
   }
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs(("Turret/" + side.getName()), inputs);
+    Logger.processInputs("Turret", inputs);
 
-    if (inputs.limitTriggered) {
-      isZeroed = true;
-    }
-
-    if (side == ShooterSide.LEFT) {
-      RobotVisualizer.getInstance().setLeftTurretAngle(Rotation2d.fromRadians(inputs.positionRad));
-    } else if (side == ShooterSide.RIGHT) {
-      RobotVisualizer.getInstance().setRightTurretAngle(Rotation2d.fromRadians(inputs.positionRad));
-    }
-
-    Logger.recordOutput(("Turret/" + side.getName() + "/TargetAngle"), targetAngle);
+    RobotVisualizer.getInstance().setTurretAzimuthAngle(Rotation2d.fromRadians(inputs.positionRad));
   }
 
   @Override
   public void periodicAfterScheduler() {
     io.applyOutputs(outputs);
+    Logger.recordOutput("Turret/Mode", outputs.mode.toString());
+    Logger.recordOutput(("Turret/TargetAngle"), targetAngle);
+    Logger.recordOutput(("Turret/TargetAngleDegrees"), targetAngle.getDegrees());
+    Logger.recordOutput(
+        ("Turret/TargetOffsetDegrees"),
+        targetAngle.minus(Rotation2d.fromRadians(inputs.positionRad)).getDegrees());
   }
 
   public Command trackTarget(Supplier<Translation2d> targetSupplier) {
@@ -71,11 +62,9 @@ public class Turret extends FullSubsystem {
         () -> {
           Translation2d target = targetSupplier.get();
           Pose2d robotPose = RobotState.getInstance().getEstimatedPose();
+          RobotContainer.field2d.setRobotPose(robotPose);
 
-          Translation2d turretOffset =
-              (this.side == ShooterSide.LEFT
-                  ? TurretConstants.kRobotToLeftTurret.getTranslation().toTranslation2d()
-                  : TurretConstants.kRobotToRightTurret.getTranslation().toTranslation2d());
+          Translation2d turretOffset = Translation2d.kZero;
 
           // Turret position in field coordinates
           Translation2d turretFieldPos =
@@ -83,22 +72,23 @@ public class Turret extends FullSubsystem {
 
           // Vector from turret -> target (field frame)
           Translation2d deltaField = target.minus(turretFieldPos);
+          Logger.recordOutput("Turret Target Distance X", deltaField.getX());
+          Logger.recordOutput("Turret Target Distance", deltaField.getDistance(target));
+          Logger.recordOutput("Turret Target Norm", deltaField.getNorm());
+          Logger.recordOutput("Turret Target Distance Y", deltaField.getY());
+          Logger.recordOutput("Turret Target Angle?", deltaField.getAngle().getDegrees());
 
           // Convert to robot frame
           Translation2d deltaRobot = deltaField.rotateBy(robotPose.getRotation().unaryMinus());
 
           // Angle turret should point (robot-relative)
-          Rotation2d targetAngle = new Rotation2d(Math.atan2(deltaRobot.getY(), deltaRobot.getX()));
+          Rotation2d targetAngle =
+              Rotation2d.fromRadians(Math.atan2(deltaRobot.getY(), deltaRobot.getX()));
 
           this.targetAngle = targetAngle;
-
-          setPosition(targetAngle);
+          setPosition(targetAngle.unaryMinus());
         },
         this);
-  }
-
-  public Command zero() {
-    return Commands.startEnd(() -> setOpenLoop(0.2), () -> stop()).until(this::isZeroed);
   }
 
   /**
@@ -109,16 +99,7 @@ public class Turret extends FullSubsystem {
    * @param position A {@link Rotation2d} object representing the target position of the turret.
    */
   public void setPosition(Rotation2d position) {
-    if (!isZeroed) return; // safety
-
     targetAngle = position;
-
-    position =
-        Rotation2d.fromRadians(
-            MathUtil.clamp(
-                position.getRadians(),
-                TurretConstants.kMinTurretAngleRad,
-                TurretConstants.kMaxTurretAngleRad));
 
     outputs.mode = TurretIOOutputMode.CLOSED_LOOP;
     outputs.closedLoopTarget = position;
@@ -148,13 +129,5 @@ public class Turret extends FullSubsystem {
 
   public boolean atGoal() {
     return atGoal;
-  }
-
-  public boolean isZeroed() {
-    return isZeroed;
-  }
-
-  public ShooterSide getSide() {
-    return this.side;
   }
 }

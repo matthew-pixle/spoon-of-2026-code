@@ -5,17 +5,14 @@ import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.DeviceIDs;
-import frc.robot.subsystems.shooter.Shooter.ShooterSide;
 import frc.robot.subsystems.shooter.ShooterConstants.FlywheelConstants;
 
 public class FlywheelIOTalonFX implements FlywheelIO {
@@ -29,20 +26,10 @@ public class FlywheelIOTalonFX implements FlywheelIO {
 
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
 
-  public FlywheelIOTalonFX(ShooterSide side) {
-    motor =
-        new TalonFX(
-            side == ShooterSide.LEFT
-                ? DeviceIDs.kLeftTurretFlywheel
-                : DeviceIDs.kRightTurretFlywheel);
+  public FlywheelIOTalonFX() {
+    motor = new TalonFX(DeviceIDs.kTurretFlywheel);
     motorConfig =
         new TalonFXConfiguration()
-            .withMotorOutput(
-                new MotorOutputConfigs()
-                    .withInverted(
-                        side == ShooterSide.RIGHT
-                            ? InvertedValue.Clockwise_Positive
-                            : InvertedValue.CounterClockwise_Positive))
             .withSlot0(FlywheelConstants.kGains)
             /**
              * TODO: Update gains Peiwei, Ben: see the FlywheelConstants.kGains above... thats where

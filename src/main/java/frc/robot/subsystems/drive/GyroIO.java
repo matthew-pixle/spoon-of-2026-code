@@ -16,8 +16,6 @@ public interface GyroIO {
     public boolean connected = false; //determines if gyro is connected
     public Rotation2d yawPosition = Rotation2d.kZero; //records yaw position in degrees
     public double yawVelocityRadPerSec = 0.0; //records yaw velocity in rad/sec
-    public double[] odometryYawTimestamps = new double[] {}; //i think it creates timestamps for the odometry relating to yaw
-    public Rotation2d[] odometryYawPositions = new Rotation2d[] {}; // records th odometry for the yaw positions
   }
 
   public default void updateInputs(GyroIOInputs inputs) {}
